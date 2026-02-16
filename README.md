@@ -1,6 +1,6 @@
 # 🟩 Chroma Key Studio
 
-**[English]** | [Bahasa Indonesia](#-chroma-key-studio---bahasa-indonesia)
+**[English]** | [Bahasa Indonesia]
 
 A lightweight, browser-based tool designed to remove solid colored backgrounds (Green Screen) from images instantly. Built with pure JavaScript and Tailwind CSS, focused on performance and ease of use.
 
