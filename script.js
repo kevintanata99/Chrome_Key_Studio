@@ -1,5 +1,3 @@
-// script.js
-
 // State Variables
 const state = {
     img: null,
@@ -51,7 +49,7 @@ const toleranceRangeMobile = document.getElementById('toleranceRangeMobile');
 const featherRangeMobile = document.getElementById('featherRangeMobile');
 const downloadBtnMobile = document.getElementById('downloadBtnMobile');
 
-// --- History System ---
+// History System
 
 function saveState() {
     if (historyIndex < history.length - 1) {
@@ -124,7 +122,7 @@ function updateUndoRedoUI() {
     btnRedo.style.opacity = btnRedo.disabled ? '0.3' : '1';
 }
 
-// --- Zoom System ---
+// Zoom System
 scrollWrapper.addEventListener('wheel', (e) => {
     if (e.ctrlKey) {
         e.preventDefault();
@@ -162,7 +160,7 @@ function setZoom(val) {
     canvas.style.height = `${newH}px`;
 }
 
-// --- Mode Handling ---
+// Mode Handling
 window.setMode = function(mode) {
     if (state.mode !== mode) {
         state.mode = mode;
@@ -183,14 +181,20 @@ function setModeUIOnly(mode) {
     const colorPicker = document.getElementById('colorPicker');
     const pickerTooltip = document.getElementById('pickerTooltip');
 
-    const activeClass = "bg-white shadow text-indigo-700 font-semibold";
-    const inactiveClass = "text-gray-500 hover:text-gray-700";
+    // Styling classes updated for Dark Mode compatibility
+    const activeClass = "bg-white dark:bg-gray-600 shadow text-indigo-700 dark:text-indigo-300 font-semibold";
+    const inactiveClass = "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200";
+
+    // Mobile classes
+    const mobActive = "bg-white dark:bg-gray-600 text-indigo-700 dark:text-indigo-300 shadow font-bold";
+    const mobInactive = "text-gray-500 dark:text-gray-400 font-medium";
 
     if (mode === 'global') {
-        btnGlobal.className = "flex-1 py-2 px-2 rounded-md " + activeClass;
-        btnMagic.className = "flex-1 py-2 px-2 rounded-md " + inactiveClass;
-        mobGlobal.className = "flex-1 py-1 text-xs rounded font-bold bg-white text-indigo-700 shadow";
-        mobMagic.className = "flex-1 py-1 text-xs rounded font-medium text-gray-500";
+        btnGlobal.className = "flex-1 py-2 px-2 rounded-md transition " + activeClass;
+        btnMagic.className = "flex-1 py-2 px-2 rounded-md transition " + inactiveClass;
+        
+        mobGlobal.className = "flex-1 py-1 text-xs rounded transition " + mobActive;
+        mobMagic.className = "flex-1 py-1 text-xs rounded transition " + mobInactive;
         
         modeDesc.textContent = "Menghapus warna yang dipilih di seluruh area gambar.";
         clickInstruction.textContent = "Klik gambar atau pilih kotak warna manual.";
@@ -202,10 +206,11 @@ function setModeUIOnly(mode) {
 
     } else {
         // Magic Mode
-        btnGlobal.className = "flex-1 py-2 px-2 rounded-md " + inactiveClass;
-        btnMagic.className = "flex-1 py-2 px-2 rounded-md " + activeClass;
-        mobGlobal.className = "flex-1 py-1 text-xs rounded font-medium text-gray-500";
-        mobMagic.className = "flex-1 py-1 text-xs rounded font-bold bg-white text-indigo-700 shadow";
+        btnGlobal.className = "flex-1 py-2 px-2 rounded-md transition " + inactiveClass;
+        btnMagic.className = "flex-1 py-2 px-2 rounded-md transition " + activeClass;
+
+        mobGlobal.className = "flex-1 py-1 text-xs rounded transition " + mobInactive;
+        mobMagic.className = "flex-1 py-1 text-xs rounded transition " + mobActive;
         
         modeDesc.textContent = "Klik di gambar untuk hapus area spesifik. (Color Picker dinonaktifkan)";
         clickInstruction.textContent = "Warna otomatis terdeteksi saat klik gambar.";
@@ -217,27 +222,30 @@ function setModeUIOnly(mode) {
     }
 }
 
-// --- Event Listeners ---
+// Event Listeners
 fileInput.addEventListener('change', handleFileSelect);
 
 dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
-    if(e.dataTransfer.types.includes('Files')) dropZone.classList.add('bg-indigo-50');
+    if(e.dataTransfer.types.includes('Files')) {
+        dropZone.classList.add('bg-indigo-50');
+        dropZone.classList.add('dark:bg-gray-800');
+    }
 });
 dropZone.addEventListener('dragleave', (e) => {
     e.preventDefault();
     dropZone.classList.remove('bg-indigo-50');
+    dropZone.classList.remove('dark:bg-gray-800');
 });
 dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('bg-indigo-50');
+    dropZone.classList.remove('dark:bg-gray-800');
     if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
 });
 
 colorPicker.addEventListener('change', (e) => {
-    // Double check mode just in case
     if (state.mode === 'magic') return;
-
     const newColor = hexToRgb(e.target.value);
     state.targetColor = newColor;
     saveState();
@@ -245,8 +253,7 @@ colorPicker.addEventListener('change', (e) => {
 });
 
 colorPicker.addEventListener('input', (e) => {
-    if (state.mode === 'magic') return; // Do nothing in magic mode
-
+    if (state.mode === 'magic') return;
     const newColor = hexToRgb(e.target.value);
     state.targetColor = newColor;
     if (state.mode === 'global') {
@@ -264,7 +271,6 @@ canvas.addEventListener('mousedown', (e) => {
     const pixel = ctx.getImageData(x, y, 1, 1).data;
     const newColor = { r: pixel[0], g: pixel[1], b: pixel[2] };
 
-    // Even if disabled in UI, we update the value internally for feedback
     state.targetColor = newColor;
     colorPicker.value = rgbToHex(pixel[0], pixel[1], pixel[2]);
     
@@ -329,7 +335,32 @@ window.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
 });
 
-// --- Core Functions ---
+function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.classList.toggle('dark');
+    updateThemeIcon(isDark);
+}
+
+function updateThemeIcon(isDark) {
+    const iconSun = document.getElementById('iconSun');
+    const iconMoon = document.getElementById('iconMoon');
+    
+    if (!iconSun || !iconMoon) return;
+
+    if (isDark) {
+        // Mode Gelap Aktif
+        iconSun.classList.remove('hidden');
+        iconMoon.classList.add('hidden');
+    } else {
+        // Mode Terang Aktif
+        iconSun.classList.add('hidden');
+        iconMoon.classList.remove('hidden');
+    }
+}
+
+// Initialize Theme
+updateThemeIcon(document.documentElement.classList.contains('dark'));
+
 
 function handleFileSelect(e) { if (e.target.files.length) handleFile(e.target.files[0]); }
 
@@ -364,7 +395,6 @@ function handleFile(file) {
             history.length = 0;
             historyIndex = -1;
             state.magicPoints = [];
-            // Default start in Magic Mode
             setModeUIOnly('magic'); 
             state.mode = 'magic';
             resetZoom(); 
@@ -393,7 +423,7 @@ function processImage() {
 
     const srcData = state.originalData.data; 
 
-    // --- 1. Generate Base Alpha Mask ---
+    // Generate Base Alpha Mask
     if (state.mode === 'global') {
         processGlobalMask(srcData, alphaMask);
     } else {
@@ -404,7 +434,7 @@ function processImage() {
         }
     }
 
-    // --- 2. Post Processing ---
+    // Post Processing
     let finalAlpha = alphaMask; 
 
     if (state.erode > 0 || state.feather > 0) {
@@ -419,7 +449,7 @@ function processImage() {
             finalAlpha = tempBuffer;
     }
 
-    // --- 3. Render ---
+    // Render
     const output = ctx.createImageData(width, height);
     const dst = output.data;
 
@@ -495,25 +525,20 @@ function processMagicWandMask(srcData, alphaMask, width, height, pointData) {
     }
 }
 
-// --- Post Processing Filters ---
-
 function applyErode(buffer, width, height, radius) {
     const len = buffer.length;
     const temp = new Uint8Array(len);
-    
     for (let iter = 0; iter < radius; iter++) {
         temp.set(buffer); 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const i = y * width + x;
                 if (temp[i] === 0) continue; 
-
                 let minVal = temp[i];
                 if (x > 0) minVal = Math.min(minVal, temp[i-1]);
                 if (x < width-1) minVal = Math.min(minVal, temp[i+1]);
                 if (y > 0) minVal = Math.min(minVal, temp[i-width]);
                 if (y < height-1) minVal = Math.min(minVal, temp[i+width]);
-
                 buffer[i] = minVal;
             }
         }
@@ -522,10 +547,8 @@ function applyErode(buffer, width, height, radius) {
 
 function applyFeather(buffer, width, height, radius) {
     if (radius === 0) return;
-
     const len = buffer.length;
     const temp = new Float32Array(len); 
-
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             let sum = 0;
@@ -540,7 +563,6 @@ function applyFeather(buffer, width, height, radius) {
             temp[y * width + x] = sum / count;
         }
     }
-
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
             let sum = 0;
@@ -571,7 +593,6 @@ function resetApp() {
     state.magicPoints = [];
     history.length = 0;
     historyIndex = -1;
-    
     emptyState.classList.remove('hidden');
     scrollWrapper.classList.add('hidden');
     zoomToolbar.classList.add('hidden');
@@ -582,11 +603,7 @@ function resetApp() {
 
 function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : {r:0, g:255, b:0};
+    return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : {r:0, g:255, b:0};
 }
 
 function rgbToHex(r, g, b) {
