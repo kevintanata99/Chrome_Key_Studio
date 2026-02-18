@@ -366,7 +366,7 @@ function handleFileSelect(e) { if (e.target.files.length) handleFile(e.target.fi
 
 function handleFile(file) {
     if (!file.type.match('image.*')) {
-        alert("Leon sayang, ini bukan file gambar.");
+        alert("Hey, ini bukan file gambar.");
         return;
     }
     loadingState.classList.remove('hidden');
@@ -581,7 +581,7 @@ function applyFeather(buffer, width, height, radius) {
 
 function downloadImage() {
     const link = document.createElement('a');
-    link.download = 'edited-by-leon-refined.png';
+    link.download = 'edited.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
 }
